@@ -37,6 +37,8 @@ export default function Ready() {
           <tr>
             <th>票号</th>
             <th>顾客</th>
+            <th>衣物件</th>
+            <th>风险</th>
             <th>承诺日</th>
             <th>暗码</th>
             <th>操作</th>
@@ -47,6 +49,21 @@ export default function Ready() {
             <tr key={r.ticket_no}>
               <td>{r.ticket_no}</td>
               <td>{r.customer_name}</td>
+              <td>
+                {(r.items || []).map((i) => (
+                  <span key={i.id} className={i.risk_flag ? "item risk" : "item"}>
+                    {i.garment}×{i.qty}
+                    {i.risk_flag ? "⚠" : ""}
+                  </span>
+                ))}
+              </td>
+              <td>
+                {r.risk_state === "已清" ? (
+                  <span className="badge 风险已清">风险已清</span>
+                ) : (
+                  "—"
+                )}
+              </td>
               <td>{r.due_date}</td>
               <td>
                 <input

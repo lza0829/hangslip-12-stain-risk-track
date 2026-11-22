@@ -29,6 +29,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  拆票: (no, body) =>
+    req(`/挂牌/${encodeURIComponent(no)}/拆票`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  清险: (no, body) =>
+    req(`/挂牌/${encodeURIComponent(no)}/清险`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
   取衣: (no, body) =>
     req(`/挂牌/${encodeURIComponent(no)}/取衣`, {
       method: "POST",

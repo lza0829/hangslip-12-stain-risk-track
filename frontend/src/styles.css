@@ -307,6 +307,57 @@ th {
   color: var(--steam);
 }
 
+.badge.混票 {
+  border-color: rgba(214, 69, 61, 0.6);
+  color: #f0a29d;
+}
+
+.badge.风险未清 {
+  border-color: rgba(196, 122, 34, 0.65);
+  color: #f0c2a0;
+}
+
+.badge.风险已清 {
+  border-color: rgba(61, 139, 110, 0.55);
+  color: #9fd6bd;
+}
+
+.item {
+  display: inline-block;
+  margin: 0 6px 4px 0;
+  padding: 1px 7px;
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--soap);
+}
+
+.item.risk {
+  border-color: rgba(196, 122, 34, 0.6);
+  color: #f0c2a0;
+}
+
+.risk-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--soap);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.risk-check input {
+  min-width: auto;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--warn);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .msg {
   margin: 8px 0 14px;
   color: #f0c2a0;

@@ -12,6 +12,7 @@ class ItemIn(BaseModel):
     garment: str
     qty: int = Field(ge=1)
     remark: str = ""
+    risk: bool = False
 
 
 class TicketIn(BaseModel):
@@ -42,6 +43,16 @@ class QuarantineIn(BaseModel):
     operator: str = "店员"
 
 
+class SplitIn(BaseModel):
+    operator: str = "店员"
+    note: str = ""
+
+
+class ClearRiskIn(BaseModel):
+    operator: str = "店员"
+    note: str = ""
+
+
 @router.get("/挂牌")
 def list_tickets(
     status: str | None = Query(None),
@@ -63,6 +74,16 @@ def create_ticket(body: TicketIn):
 @router.post("/挂牌/{ticket_no}/推进")
 def advance(ticket_no: str, body: AdvanceIn):
     return svc.advance(ticket_no, body.to_status, body.operator, body.note)
+
+
+@router.post("/挂牌/{ticket_no}/拆票")
+def split(ticket_no: str, body: SplitIn):
+    return svc.split_ticket(ticket_no, body.operator, body.note)
+
+
+@router.post("/挂牌/{ticket_no}/清险")
+def clear_risk(ticket_no: str, body: ClearRiskIn):
+    return svc.clear_risk(ticket_no, body.operator, body.note)
 
 
 @router.post("/挂牌/{ticket_no}/取衣")

@@ -23,14 +23,23 @@ CREATE TABLE IF NOT EXISTS hang_tickets (
   opened_at TEXT NOT NULL,
   due_date TEXT NOT NULL,
   closed_at TEXT,
-  note TEXT NOT NULL DEFAULT ''
+  note TEXT NOT NULL DEFAULT '',
+  risk_state TEXT NOT NULL DEFAULT '无'
 );
 CREATE TABLE IF NOT EXISTS ticket_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   ticket_no TEXT NOT NULL,
   garment TEXT NOT NULL,
   qty INTEGER NOT NULL,
-  remark TEXT NOT NULL DEFAULT ''
+  remark TEXT NOT NULL DEFAULT '',
+  risk_flag INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS risk_confirmations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ticket_no TEXT NOT NULL,
+  operator TEXT NOT NULL,
+  confirmed_at TEXT NOT NULL,
+  note TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS process_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,6 +91,13 @@ FORWARD = {
     "待取": (),
 }
 
+# 染色风险口径（全局唯一）：强制分轨。
+# 含风险件的票不得与普通件混票推进到待取；纯风险票未清险不得进待取。
+RISK_NONE = "无"
+RISK_PENDING = "未清"
+RISK_CLEARED = "已清"
+RISK_POLICY = "强制分轨：含染色风险件不与普通件同票进待取，风险侧清险确认后方可待取"
+
 
 def connect() -> sqlite3.Connection:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -106,10 +122,23 @@ def transaction():
         conn.close()
 
 
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, ddl: str) -> None:
+    cols = [r["name"] for r in conn.execute(f"PRAGMA table_info({table})")]
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
+
+
 def init_db() -> None:
     conn = connect()
     try:
         conn.executescript(SCHEMA)
+        # 老库迁移：补风险列（新库由 SCHEMA 自带，幂等）
+        _ensure_column(conn, "hang_tickets", "risk_state", "risk_state TEXT NOT NULL DEFAULT '无'")
+        _ensure_column(conn, "ticket_items", "risk_flag", "risk_flag INTEGER NOT NULL DEFAULT 0")
+        conn.execute(
+            "INSERT OR IGNORE INTO settings(key, value) VALUES ('风险口径', ?)",
+            (RISK_POLICY,),
+        )
         conn.commit()
     finally:
         conn.close()
